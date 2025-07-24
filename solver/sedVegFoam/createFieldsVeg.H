@@ -77,3 +77,57 @@ volVectorField VegDragContr
     ),
     fvc::grad(pff)
 );
+
+
+
+
+
+
+// Vertical velocity gradient
+//volTensorField gradU = fvc::grad(Ub)();
+//volScalarField dudz = gradU.component(tensor::XZ);
+//dimensionedScalar gradsmall("gradsmall",dimensionSet(0,0,-1,0,0,0,0),1e-6); 
+/*
+// Dispersive viscosity
+volScalarField nuDisp
+(
+    IOobject
+    (
+        "nuDisp",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    (
+       0.5 * alphaVeg * sqr(dc) * (1/sn) * mag(Ub)
+    )
+);
+*/
+
+
+// Mesh coordinates 
+volScalarField Y(U.mesh().C().component(vector::Y));
+// Dispersive stress 
+volScalarField nuDisp
+(
+    IOobject
+    (
+        "nuDisp",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    (
+        alphaVeg * sn * Y * mag(Ub)/dc
+    )
+);
+
+
+
+
+
+
+
+

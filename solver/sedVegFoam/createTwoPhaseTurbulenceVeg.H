@@ -61,3 +61,14 @@ volScalarField ESD8
     ),
     (alphaVeg/rhob*Kveg)
 );
+
+
+
+
+
+
+
+
+
+
+

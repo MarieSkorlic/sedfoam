@@ -245,6 +245,7 @@ twophasekOmegaVeg<BasicTurbulenceModel>::twophasekOmegaVeg
     ESD7_(U.db().lookupObject<volScalarField> ("ESD7")),
     ESD8_(U.db().lookupObject<volScalarField> ("ESD8")),
     ESD_(U.db().lookupObject<volScalarField> ("ESD")),
+	
 
     k_
     (

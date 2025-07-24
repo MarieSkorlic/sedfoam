@@ -110,6 +110,36 @@ surfaceScalarField phiRb
    /fvc::interpolate(beta)
 );
 
+//////////////// Disp Stress ///////////////
+
+surfaceScalarField phiDisp
+(
+	"phiDisp",
+    (
+		- 0.0001 * ((pow(fvc::interpolate(Y),0.4395)) *fvc::interpolate(pow(Foam::max(Y) - Y,3.2981))
+		/ fvc::interpolate(pow(dc,3.7376))
+		* fvc::interpolate(mag(Ub))
+		* mesh.magSf())
+    )
+);
+
+//SourceDisp
+volTensorField RDisp
+(
+   "RDisp",
+   (
+		- 0.0001 * (pow(Y,0.4395) *pow((Foam::max(Y) - Y),3.2981)) /pow(dc,3.7376)
+		* Ub * Ub 
+    )
+);
+
+Info << "[INFO] : max phiDisp " << max(Foam::mag(phiDisp)) << endl;
+Info << "[INFO] : max phiRb " << max(Foam::mag(phiRb)) << endl;
+
+
+///////////End Disp Stress /////////////////
+
+
 // Assemble momentum balance equation for phase b
 fvVectorMatrix UbEqn
 (
@@ -124,6 +154,12 @@ fvVectorMatrix UbEqn
   - fvm::Sp(fvc::div(phiRb), Ub)
   + fvc::div(Rcb)
   + (fvc::grad(beta)/(beta) & Rcb)
+  
+  //Disp Stress contribution
+  + fvm::div(phiDisp,Ub, "div(phiDisp,Ub)")
+  + (fvc::grad(beta)/(beta) & RDisp)
+   
+   
     ==
     susb     // anistropic turbulent suspension term
   + alpha/rhob*(liftCoeff + Cvm*rhob*DDtUa) // lift & added mass forces

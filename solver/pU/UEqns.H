@@ -124,6 +124,7 @@ fvVectorMatrix UbEqn
   - fvm::Sp(fvc::div(phiRb), Ub)
   + fvc::div(Rcb)
   + (fvc::grad(beta)/(beta) & Rcb)
+  //fvm::div(phiRbDisp, Ub, "div(phiRbDisp,Ub)")
     ==
     susb     // anistropic turbulent suspension term
   + alpha/rhob*(liftCoeff + Cvm*rhob*DDtUa) // lift & added mass forces
