@@ -110,8 +110,8 @@ surfaceScalarField phiRb
    /fvc::interpolate(beta)
 );
 
-//////////////// Disp Stress ///////////////
-
+// -- Dispersive Stress in UEqn -- //
+/*
 surfaceScalarField phiDisp
 (
 	"phiDisp",
@@ -135,7 +135,7 @@ volTensorField RDisp
 
 Info << "[INFO] : max phiDisp " << max(Foam::mag(phiDisp)) << endl;
 Info << "[INFO] : max phiRb " << max(Foam::mag(phiRb)) << endl;
-
+*/
 
 ///////////End Disp Stress /////////////////
 
@@ -156,8 +156,8 @@ fvVectorMatrix UbEqn
   + (fvc::grad(beta)/(beta) & Rcb)
   
   //Disp Stress contribution
-  + fvm::div(phiDisp,Ub, "div(phiDisp,Ub)")
-  + (fvc::grad(beta)/(beta) & RDisp)
+  //+ fvm::div(phiDisp,Ub, "div(phiDisp,Ub)")
+  //+ (fvc::grad(beta)/(beta) & RDisp)
    
    
     ==

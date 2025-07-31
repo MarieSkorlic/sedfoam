@@ -32,6 +32,7 @@ namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+//  -- nut = (ks + kw) / max(ks;kw) -- // 
 
 template<class BasicTurbulenceModel>
 void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
@@ -48,6 +49,21 @@ void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
     BasicTurbulenceModel::correctNut();
 }
 
+
+/*
+// -- 1/nut = 1/nuts + 1/nutw = omegas/ks + omegaw/kw
+template<class BasicTurbulenceModel>
+void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
+{
+     this->nut_ = (kw_ * ks_) / (omegaw_ * ks_ + omegas_ * kw_);
+
+    this->nut_.min(nutMax_);
+    this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
+}
+*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

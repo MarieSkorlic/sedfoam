@@ -148,12 +148,15 @@ else if (granularRheology.on())
 else
 {
     nuEffa = sqr(Ct)*turbulenceb->nut() + nua;
-    //Info << " [INFO] nuEffb = nub + turbulenceb->nut() + nuDisp;" <<endl;
-    //Y = U.mesh().C().component(vector::Y);
-    //nuDisp = (1/2.0) * alphaVeg * sn * Y * mag(Ub)/dc;
-    //nuDisp = (1/10.0) * alphaVeg * (Foam::max(Y) - Y) * mag(Ub) * Foam::min(sn,dc) / dc ;
-    //nuEffb = turbulenceb->nut() + nub + nuDisp;
     
+    // -- Dispersive viscosity -- //
+    /*
+    Info << " [INFO] nuEffb = nub + turbulenceb->nut() + nuDisp;" <<endl;
+    Y = U.mesh().C().component(vector::Y);
+    //nuDisp = (1/2.0) * alphaVeg * sn * Y * mag(Ub)/dc;
+    nuDisp = (1/10.0) * alphaVeg * (Foam::max(Y) - Y) * mag(Ub) * Foam::min(sn,dc) / dc ;
+    nuEffb = turbulenceb->nut() + nub + nuDisp;
+    */
     
     nuEffb = turbulenceb->nut() + nub;
 
