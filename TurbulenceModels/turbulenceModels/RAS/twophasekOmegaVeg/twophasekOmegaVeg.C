@@ -32,11 +32,12 @@ namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-//  -- nut = (ks + kw) / max(ks;kw) -- // 
-
+//  -- nut = (ks + kw) / max(omegas;omegaw) -- // 
+/*
 template<class BasicTurbulenceModel>
 void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
 {
+     Info << "[INFO] : nut is computed with maximum of dissipation frequency" << endl;
      this->nut_ = k_/
     (
         max(omega_, Clim_*sqrt((2.0*(magSqr(symm(fvc::grad(this->U_)))))/Cmu_))
@@ -48,14 +49,20 @@ void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
 
     BasicTurbulenceModel::correctNut();
 }
-
+*/
 
 /*
 // -- 1/nut = 1/nuts + 1/nutw = omegas/ks + omegaw/kw
 template<class BasicTurbulenceModel>
 void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
 {
-     this->nut_ = (kw_ * ks_) / (omegaw_ * ks_ + omegas_ * kw_);
+     Info << "[INFO] : nut is computed as harmonic mean of nuts and nutw" << endl;
+     bound(ks_, this->kMin_);
+     bound(kw_, this->kMin_);
+     bound(omegas_, this->omegaMin_);
+     bound(omegaw_, this->omegaMin_);
+     //this->nut_ = (kw_ * ks_) / (omegaw_ * ks_ + omegas_ * kw_);
+     this->nut_ = (1.) /( (omegas_ / ks_) + (omegaw_ /kw_)  );
 
     this->nut_.min(nutMax_);
     this->nut_.correctBoundaryConditions();
@@ -64,6 +71,46 @@ void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
     BasicTurbulenceModel::correctNut();
 }
 */
+
+
+/*
+// -- nut = nuts + nutw -- //
+template<class BasicTurbulenceModel>
+void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
+{
+     Info << "[INFO] : nut is computed as sum of nuts and nutw" << endl;
+     bound(omegas_, this->omegaMin_);
+     bound(omegaw_, this->omegaMin_);
+     this->nut_ = (ks_ / omegas_) + (kw_ / omegaw_);
+
+    this->nut_.min(nutMax_);
+    this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
+}
+*/
+
+
+// -- nut = max(nuts,nutw) -- //
+template<class BasicTurbulenceModel>
+void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
+{
+     Info << "[INFO] : nut is computed as max(nuts,nutw) " << endl;
+     bound(omegas_, this->omegaMin_);
+     bound(omegaw_, this->omegaMin_);
+     this->nut_ = max ( (ks_ / omegas_) , (kw_ / omegaw_) );
+
+    this->nut_.min(nutMax_);
+    this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
+}
+
+
+
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

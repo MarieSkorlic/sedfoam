@@ -135,10 +135,8 @@ volTensorField RDisp
 
 Info << "[INFO] : max phiDisp " << max(Foam::mag(phiDisp)) << endl;
 Info << "[INFO] : max phiRb " << max(Foam::mag(phiRb)) << endl;
+// -- END DISP STRESS -- //
 */
-
-///////////End Disp Stress /////////////////
-
 
 // Assemble momentum balance equation for phase b
 fvVectorMatrix UbEqn
