@@ -110,33 +110,87 @@ surfaceScalarField phiRb
    /fvc::interpolate(beta)
 );
 
+
+
 // -- Dispersive Stress in UEqn -- //
+//SourceDisp
+//Averaged velocity Up
 /*
-surfaceScalarField phiDisp
+vector UbInt(0,0,0);
+
+forAll(Ub, cellI)
+{
+    UbInt += Ub[cellI] * mesh.V()[cellI];
+}
+
+scalar V = 0.0;
+forAll(mesh.V(), cellI)
+{
+    V += mesh.V()[cellI];
+}
+
+vector UbMean = UbInt / V;
+
+
+
+volVectorField Up
 (
-	"phiDisp",
+    IOobject
     (
-		- 0.0001 * ((pow(fvc::interpolate(Y),0.4395)) *fvc::interpolate(pow(Foam::max(Y) - Y,3.2981))
-		/ fvc::interpolate(pow(dc,3.7376))
-		* fvc::interpolate(mag(Ub))
-		* mesh.magSf())
-    )
+        "Up",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedVector("Up", dimensionSet(0, 1, -1, 0, 0) , UbMean)
 );
 
-//SourceDisp
-volTensorField RDisp
+
+Info << "[INFO] Ub min = " << min(Ub).value() << " max = " << max(Ub).value() << endl;
+Info << "[INFO] Total Volume" << V << endl;
+Info << "[INFO] Up min = " << min(Up).value() << " max = " << max(Up).value() << endl;
+
+
+//Non dépendant de Ub mais de la vitesse moyenne Up 
+volVectorField RDisp
 (
    "RDisp",
    (
-		- 0.0001 * (pow(Y,0.4395) *pow((Foam::max(Y) - Y),3.2981)) /pow(dc,3.7376)
-		* Ub * Ub 
-    )
+		   - beta * sqr(Foam::max(dv - Y, Y0)) / pow(dv,3.)
+		 * Up * mag(Up)
+   )
 );
 
-Info << "[INFO] : max phiDisp " << max(Foam::mag(phiDisp)) << endl;
-Info << "[INFO] : max phiRb " << max(Foam::mag(phiRb)) << endl;
-// -- END DISP STRESS -- //
+
+
+volScalarField lm
+(
+   "lm",
+   (
+		    Foam::max(dv - Y, Y0)	
+   )
+);
+
+
+volSymmTensorField RDisp
+(
+   "RDisp",
+   (
+		    -0.01 *  sqr(lm/dv) * sqr(Ub)
+   )
+);
+
+
+surfaceScalarField phiDisp
+(
+	- 0.01 * fvc::interpolate(sqr(lm))*mesh.magSf() * fvc::interpolate(mag(Ub)) / sqr(dv)
+);
 */
+// -- END DISP STRESS -- //
+
+
 
 // Assemble momentum balance equation for phase b
 fvVectorMatrix UbEqn
@@ -153,13 +207,16 @@ fvVectorMatrix UbEqn
   + fvc::div(Rcb)
   + (fvc::grad(beta)/(beta) & Rcb)
   
+  
   //Disp Stress contribution
-  //+ fvm::div(phiDisp,Ub, "div(phiDisp,Ub)")
-  //+ (fvc::grad(beta)/(beta) & RDisp)
-   
-   
+  /*
+   + fvm::div(phiDisp,Ub, "div(phiDisp,Ub)")
+   + (fvc::grad(beta)/(beta) & RDisp)
+	*/
+  
     ==
-    susb     // anistropic turbulent suspension term
+   susb     // anistropic turbulent suspension term
+  //- RDisp 	   // Source term for dispersive stress
   + alpha/rhob*(liftCoeff + Cvm*rhob*DDtUa) // lift & added mass forces
   + fvOptions(beta, Ub)
 );

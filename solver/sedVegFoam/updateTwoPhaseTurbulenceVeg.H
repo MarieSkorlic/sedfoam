@@ -37,14 +37,4 @@ ESD7 = 1.0 / dc * pos(sn-1.79*dc) + 1.0 /sn * neg(sn-1.79*dc);
 ESD8 = (alphaVeg/rhob*Kveg);
 
 
-/*
-// Vertical velocity gradient
-gradU = fvc::grad(Ub)();
-dudz = gradU.component(tensor::XZ);
-
-// Dispersive viscosity
-nuDisp = ( (0.0612 * alphaVeg + 0.0055) * sqr(mag(Ub)) * (1/dc) * (1/ESD7) ) / (dudz + gradsmall);
-*/
-
-
 

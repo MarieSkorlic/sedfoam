@@ -20,7 +20,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "twophasekOmegaVeg.H"
+#include "twophasekOmegaVeg2.H"
 #include "fvOptions.H"
 #include "bound.H"
 
@@ -32,13 +32,10 @@ namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-//  -- nut = (ks + kw) / max(omegas;omegaw) -- // 
 
-/*
 template<class BasicTurbulenceModel>
-void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
+void twophasekOmegaVeg2<BasicTurbulenceModel>::correctNut()
 {
-     Info << "[INFO] : nut is computed with maximum of dissipation frequency" << endl;
      this->nut_ = k_/
     (
         max(omega_, Clim_*sqrt((2.0*(magSqr(symm(fvc::grad(this->U_)))))/Cmu_))
@@ -50,73 +47,12 @@ void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
 
     BasicTurbulenceModel::correctNut();
 }
-*/
-
-/*
-// -- 1/nut = 1/nuts + 1/nutw = omegas/ks + omegaw/kw
-template<class BasicTurbulenceModel>
-void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
-{
-     Info << "[INFO] : nut is computed as harmonic mean of nuts and nutw" << endl;
-     bound(ks_, this->kMin_);
-     bound(kw_, this->kMin_);
-     bound(omegas_, this->omegaMin_);
-     bound(omegaw_, this->omegaMin_);
-     //this->nut_ = (kw_ * ks_) / (omegaw_ * ks_ + omegas_ * kw_);
-     this->nut_ = (1.) /( (omegas_ / ks_) + (omegaw_ /kw_)  );
-
-    this->nut_.min(nutMax_);
-    this->nut_.correctBoundaryConditions();
-    fv::options::New(this->mesh_).correct(this->nut_);
-
-    BasicTurbulenceModel::correctNut();
-}
-*/
-
-
-/*
-// -- nut = nuts + nutw -- //
-template<class BasicTurbulenceModel>
-void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
-{
-     Info << "[INFO] : nut is computed as sum of nuts and nutw" << endl;
-     bound(omegas_, this->omegaMin_);
-     bound(omegaw_, this->omegaMin_);
-     this->nut_ = (ks_ / omegas_) + (kw_ / omegaw_);
-
-    this->nut_.min(nutMax_);
-    this->nut_.correctBoundaryConditions();
-    fv::options::New(this->mesh_).correct(this->nut_);
-
-    BasicTurbulenceModel::correctNut();
-}
-*/
-
-
-// -- nut = min(nuts,nutw) -- //
-template<class BasicTurbulenceModel>
-void twophasekOmegaVeg<BasicTurbulenceModel>::correctNut()
-{
-     Info << "[INFO] : nut is computed as min(nuts,nutw) " << endl;
-     bound(omegas_, this->omegaMin_);
-     bound(omegaw_, this->omegaMin_);
-     this->nut_ = min((ks_ / omegas_) , (kw_ / omegaw_));
-
-    this->nut_.min(nutMax_);
-    this->nut_.correctBoundaryConditions();
-    fv::options::New(this->mesh_).correct(this->nut_);
-
-    BasicTurbulenceModel::correctNut();
-}
-
-
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-twophasekOmegaVeg<BasicTurbulenceModel>::twophasekOmegaVeg
+twophasekOmegaVeg2<BasicTurbulenceModel>::twophasekOmegaVeg2
 (
     const alphaField& beta,
     const rhoField& rho,
@@ -309,7 +245,6 @@ twophasekOmegaVeg<BasicTurbulenceModel>::twophasekOmegaVeg
     ESD7_(U.db().lookupObject<volScalarField> ("ESD7")),
     ESD8_(U.db().lookupObject<volScalarField> ("ESD8")),
     ESD_(U.db().lookupObject<volScalarField> ("ESD")),
-	
 
     k_
     (
@@ -397,7 +332,7 @@ twophasekOmegaVeg<BasicTurbulenceModel>::twophasekOmegaVeg
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasicTurbulenceModel>
-bool twophasekOmegaVeg<BasicTurbulenceModel>::read()
+bool twophasekOmegaVeg2<BasicTurbulenceModel>::read()
 {
     if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
     {
@@ -416,7 +351,7 @@ bool twophasekOmegaVeg<BasicTurbulenceModel>::read()
 
 
 template<class BasicTurbulenceModel>
-void twophasekOmegaVeg<BasicTurbulenceModel>::correct()
+void twophasekOmegaVeg2<BasicTurbulenceModel>::correct()
 {
     if (not this->turbulence_)
     {
@@ -540,7 +475,33 @@ void twophasekOmegaVeg<BasicTurbulenceModel>::correct()
     bound(ks_, this->kMin_);
 
     // Wake dissipation
-    omegaw_ = KE7_*ESD7_/Clambda_*sqrt(kw_);
+    //omegaw_ = KE7_*ESD7_/Clambda_*sqrt(kw_);
+    tmp<fvScalarMatrix> omegawEqn
+    (
+        fvm::ddt(omegaw_)
+      + fvm::div(phi, omegaw_)
+      - fvm::Sp(fvc::div(phi), omegaw_)
+      - fvm::laplacian(DomegaEff(), omegaw_)
+      ==
+      - fvm::SuSp (-alphaOmega_*KE6_*ESD6_/kw_, omegaw_)
+      - fvm::Sp(ESD_, omegaw_)
+      - fvm::Sp
+        (
+            betaOmega_*
+            (
+                (scalar(1.0)+scalar(85.0)*XsiOmega())
+                /(scalar(1.0)+scalar(100.0)*XsiOmega())
+            )*omegaw_(),
+            omegaw_
+        )
+      + CDkOmega
+      + ESD2()*fvm::Sp(C3om_*KE2_, omegaw_)
+      + fvm::Sp((C4om_*KE4_*ESD5_*nut/kw_), omegaw_)
+    );
+    omegawEqn.ref().relax();
+    fvOptions.constrain(omegawEqn.ref());
+    omegawEqn.ref().boundaryManipulate(omegaw_.boundaryFieldRef());
+    solve(omegawEqn);
     fvOptions.correct(omegaw_);
     bound(omegaw_, this->omegaMin_);
 

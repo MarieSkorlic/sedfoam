@@ -95,6 +95,9 @@ makeRASModel(twophasekOmega);
 #include "twophasekOmegaVeg.H"
 makeRASModel(twophasekOmegaVeg);
 
+#include "twophasekOmegaVeg2.H"
+makeRASModel(twophasekOmegaVeg2);
+
 #include "twophasekOmegaSAS.H"
 makeRASModel(twophasekOmegaSAS);
 

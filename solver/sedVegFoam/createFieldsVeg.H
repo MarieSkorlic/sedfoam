@@ -81,10 +81,10 @@ volVectorField VegDragContr
 
 
 
-// -- Dispersive viscosity -- //
+// -- Dispersive stress using velocity gradient and dispersive viscosity -- //
 // Mesh coordinates 
 volScalarField Y(U.mesh().C().component(vector::Y));
-// Dispersive stress 
+// Dispersive viscosity 
 volScalarField nuDisp
 (
     IOobject
@@ -100,6 +100,30 @@ volScalarField nuDisp
     )
 );
 
+
+// -- Dispersive stress directly in UEqn.H -- //
+dimensionedScalar dv
+(
+	"dv",
+	dimensionSet(0, 1 , 0, 0, 0, 0, 0),
+	0.01
+);
+
+
+
+volScalarField Y0
+(
+    IOobject
+    (
+        "Y0",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Y0", dimensionSet(0, 1, 0, 0, 0), 0.0)  
+);
 
 
 
