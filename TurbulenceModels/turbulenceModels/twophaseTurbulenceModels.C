@@ -80,6 +80,9 @@ makeRASModel(twophasekEpsilon);
 #include "twophasekEpsilonVeg.H"
 makeRASModel(twophasekEpsilonVeg);
 
+#include "twophasekEpsilonVeg2.H"
+makeRASModel(twophasekEpsilonVeg2);
+
 #include "twophaseMixingLength.H"
 makeRASModel(twophaseMixingLength);
 
@@ -94,6 +97,9 @@ makeRASModel(twophasekOmega);
 
 #include "twophasekOmegaVeg.H"
 makeRASModel(twophasekOmegaVeg);
+
+#include "twophasekOmegaVeg2.H"
+makeRASModel(twophasekOmegaVeg2);
 
 #include "twophasekOmegaSAS.H"
 makeRASModel(twophasekOmegaSAS);
