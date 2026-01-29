@@ -28,7 +28,18 @@ ESD6 = (alphaVeg/rhob*Kveg*Ub) & Ub;
 //  dp*(pow(alphaMax/(alpha+alphaSmall), 1.0/3.0)-1));
 sn = dc*(sqrt(constant::mathematical::pi/(4*(1-beta+alphaSmall)))-1);
 ESD7 = 1.0 / dc * pos(sn-1.79*dc) + 1.0 /sn * neg(sn-1.79*dc);
+/*
+volScalarField Y(U.mesh().C().component(vector::Y));
+volScalarField lt = dc*Unity;
+lt = dc * pos(Y-dc) + Y * neg(Y-dc);
+Info << "lt = " << lt << endl;
+//ESD7 = 1.0 / dc * pos(Y-dc) + 1.0 /Y * neg(Y-dc);
+ESD7 = 1/(lt+dsmall);
+Info << "1/lt = " << ESD7 << endl;
+*/
+
 //Dissipation should be zero if alphaVeg=0
-//ESD7 *= alphaVeg/(alphaVeg+alphaSmall)
+//ESD7 *= alphaVeg/(alphaVeg+alphaSmall);
+
 // Spectral shortcut
 ESD8 = (alphaVeg/rhob*Kveg);

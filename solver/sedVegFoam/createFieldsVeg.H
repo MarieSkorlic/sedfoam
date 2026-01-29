@@ -32,6 +32,17 @@ autoPtr<phaseModel> phasec = phaseModel::New
     "c"
 );
 
+dimensionedScalar dsmall
+(
+    dimensionedScalar::getOrDefault
+    (
+        "dsmall",
+        transportProperties,
+        dimensionSet(0, 1, 0, 0, 0, 0, 0),
+        1e-6
+    )
+);
+
 volScalarField& alphaVeg = phasec->alpha();
 Info<< "alpha_b is corrected to 1 - alpha_a - alpha_c\n" << endl;
 beta = 1 - alpha - alphaVeg;
