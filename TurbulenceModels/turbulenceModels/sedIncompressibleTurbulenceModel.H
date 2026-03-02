@@ -143,6 +143,7 @@ public:
         //- Return the spherical part of the subgrid scale stress tensor
         virtual tmp<Foam::volScalarField> spherSigmaSGS();
 
+
 };
 
 
